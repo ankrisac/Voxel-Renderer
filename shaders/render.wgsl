@@ -2,8 +2,13 @@ let ZERO: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
 let HALF: vec3<f32> = vec3<f32>(0.5, 0.5, 0.5);
 let UNIT: vec3<f32> = vec3<f32>(1.0, 1.0, 1.0);
 
-[[block]] struct Camera { transform: mat4x4<f32>; };
-[[group(1), binding(0)]] var<uniform> camera: Camera;
+[[block]] 
+struct Camera { 
+    transform: mat4x4<f32>; 
+};
+
+[[group(1), binding(0)]] 
+var<uniform> camera: Camera;
 
 type VoxelID = u32;
 type ChunkID = u32;
@@ -14,18 +19,26 @@ let DIM_BLOCK: u32 = 32u;
 let DIM_GRID: f32 = 256.0; 
 let RAD_GRID: f32 = 128.0; 
 
-struct Chunk { data: array<array<array<VoxelID, DIM_CHUNK>, DIM_CHUNK>, DIM_CHUNK>; };
-struct GridDesc { index: ChunkID; };
+struct Chunk { 
+    data: array<array<array<VoxelID, DIM_CHUNK>, DIM_CHUNK>, DIM_CHUNK>; 
+};
+struct GridDesc { 
+    index: ChunkID; 
+};
 
 
-[[block]] struct ChunkGrid { data: array<array<array<GridDesc, DIM_BLOCK>, DIM_BLOCK>, DIM_BLOCK>; };
+[[block]] struct ChunkGrid { 
+    data: array<array<array<GridDesc, DIM_BLOCK>, DIM_BLOCK>, DIM_BLOCK>; 
+};
 [[block]] struct ChunkCache { data: array<Chunk, 128000>; };
 
 struct VoxelType {
     color: vec3<f32>;
     lum: f32;
 };
-[[block]] struct ChunkPalette { data: array<VoxelType, 32768>; };
+[[block]] struct ChunkPalette { 
+    data: array<VoxelType, 32768>; 
+};
 
 [[block]] struct ChunkConfig {
     offset: array<vec4<f32>, 8>;

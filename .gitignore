@@ -1,0 +1,14 @@
+*
+
+!.gitignore
+!README.md
+!Cargo.toml
+
+!src
+!src/*
+
+!shaders
+!shaders/*
+
+!demo
+!demo/*

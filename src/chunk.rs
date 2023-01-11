@@ -36,38 +36,44 @@ struct Palette {
     buffer: wgpu::Buffer,
 }
 impl Palette {
+    const DEBUG: [[f32; 3]; 3] = [
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0]
+    ];
+    const LIGHT: [[f32; 3]; 4] = [
+        [1.0, 1.0, 1.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0]
+    ];
+    const METAL: [[f32; 3]; 4] = [
+        [1.0, 1.0, 1.0],
+        [0.702, 0.243, 0.24],
+        [0.161, 0.671, 0.16],
+        [0.239, 0.259, 0.67],
+    ];
+
+    const RANGE_DEBUG: Range<u32> = 1..4;
+    const RANGE_LIGHT: Range<u32> = 4..8;
+    const RANGE_METAL: Range<u32> = 8..12;
+    const RANGE_GENERAL: Range<u32> = 12..(12 + 32u32.pow(3));
+
     #[rustfmt::skip]
     fn new(device: &wgpu::Device) -> Self {
         let mut data = Vec::new();
 
         data.push(PaletteItem::air());
-        data.push(PaletteItem::color([1.0, 0.0, 0.0]));
-        data.push(PaletteItem::color([0.0, 1.0, 0.0]));
-        data.push(PaletteItem::color([0.0, 0.0, 1.0]));
 
-        let lights = [
-            [1.0, 1.0, 1.0],
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 1.0]
-        ];
-
-        for color in lights {
+        for color in Self::DEBUG {
+            data.push(PaletteItem::color(color));
+        }
+        for color in Self::LIGHT {
             data.push(PaletteItem::light(color, 50.0));
         }
-
-        
-        let metal = [
-            [1.0, 1.0, 1.0],
-            [0.702, 0.243, 0.24],
-            [0.161, 0.671, 0.16],
-            [0.239, 0.259, 0.67],
-        ];
-
-        for color in metal {
+        for color in Self::METAL {
             data.push(PaletteItem::metal(color, 0.05));
-        }
-        
+        }        
 
         let n = 32;
         let ds = 0.005;
@@ -75,7 +81,6 @@ impl Palette {
         let col = [
             (0.05, 0.26, 0.05),
         ];
-
         for (r, g, b) in col {
             let mut i = r;
             for _ in 0..n {
@@ -162,22 +167,25 @@ impl Chunk {
                     let pz = z * 8.0 + k as f64;    
 
                     use noise::NoiseFn;
-                    let surface = {
-                        let hill = 16.0 + 32.0 * perlin.get([0.01 * px, 0.01 * pz]);
-                        //let grass = 8.0 * fbm.get([px, pz]);
-                        
-                        hill// + grass;
-                    };
+                    let surface = 96.0 + 32.0 * perlin.get([0.01 * px, 0.01 * pz]);
 
-                    let id = if py < surface {
-                        let solid = perlin.get([s * px, s * py, s * pz]) < 0.1 && fastrand::bool();                    
-                        if solid { 
-                            match fastrand::u32(0..4) {
-                                0 => fastrand::u32(0..n),
-                                1 | 2 | 3 => fastrand::u32(0..32),
-                                _ => 0
+                    let id = if py < surface {                        
+                        let val = fastrand::f32();
+                        
+                        if perlin.get([s * px, s * py, s * pz]) < 0.1 {
+                            if val > 0.05 {
+                                fastrand::u32(Palette::RANGE_GENERAL)
                             }
-                        }    
+                            else if val > 0.03 {
+                                fastrand::u32(Palette::RANGE_METAL)
+                            }
+                            else if val > 0.01 {
+                                fastrand::u32(Palette::RANGE_LIGHT)
+                            }
+                            else {
+                                0
+                            }    
+                        }
                         else {
                             0
                         }
@@ -507,7 +515,7 @@ impl Grid {
     }
 }
 
-use std::sync::{ Arc, mpsc::{ Receiver, SyncSender }};
+use std::{sync::{ Arc, mpsc::{ Receiver, SyncSender }}, ops::Range};
 
 #[derive(Copy, Clone)]
 struct WorkDesc {

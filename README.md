@@ -35,3 +35,5 @@ flowchart LR
   PWorld --> PEffect
   PEffect --> Surface
 ```
+
+The raytrace function is a modified version of the algorithm in [A Fast Voxel Traversal Algorithm (1987) - Amanatides & Woo](http://www.cse.yorku.ca/~amana/research/grid.pdf)

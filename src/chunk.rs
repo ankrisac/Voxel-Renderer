@@ -173,7 +173,7 @@ impl Chunk {
                         let val = fastrand::f32();
                         
                         if perlin.get([s * px, s * py, s * pz]) < 0.1 {
-                            if val > 0.05 {
+                            if val > 0.2 {
                                 fastrand::u32(Palette::RANGE_GENERAL)
                             }
                             else if val > 0.03 {
